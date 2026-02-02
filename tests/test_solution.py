@@ -1,4 +1,4 @@
-## Student Name:
+## Student Name: 
 ## Student ID: 
 
 """
@@ -10,7 +10,6 @@ available to students.
 """
 from solution import is_allocation_feasible
 import pytest
-
 
 def test_basic_feasible_single_resource():
     # Basic Feasible Single-Resource
@@ -46,3 +45,35 @@ def test_non_dict_request_raises():
         is_allocation_feasible(resources, requests)
 
 """TODO: Add at least 5 additional test cases to test your implementation."""
+
+def test_feasible_exact_capacity_boundary():
+    resources = {'cpu': 10}
+    requests = [{'cpu': 6}, {'cpu': 4}]
+    assert is_allocation_feasible(resources, requests) is True
+
+
+def test_feasible_empty_requests():
+    resources = {'cpu': 10, 'mem': 20}
+    requests = []
+    assert is_allocation_feasible(resources, requests) is True
+
+
+def test_infeasible_single_resource_over_capacity():
+    resources = {'cpu': 10}
+    requests = [{'cpu': 8}, {'cpu': 3}]
+    assert is_allocation_feasible(resources, requests) is False
+
+
+def test_negative_request_amount_raises():
+    resources = {'cpu': 10}
+    requests = [{'cpu': -1}]
+    with pytest.raises(ValueError):
+        is_allocation_feasible(resources, requests)
+
+
+def test_resources_not_a_dict_raises():
+    resources = [('cpu', 10)]
+    requests = [{'cpu': 1}]
+    with pytest.raises(ValueError):
+        is_allocation_feasible(resources, requests)
+
