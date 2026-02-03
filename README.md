@@ -1,6 +1,6 @@
 ## TODO:
-## Student Name:
-## Student ID: 
+## Student Name: Shrey Grover
+## Student ID: 219579143
 
 # Is Resource Allocation Feasible Lab Repository
 
