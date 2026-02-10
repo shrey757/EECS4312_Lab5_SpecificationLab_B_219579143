@@ -22,53 +22,55 @@ def is_allocation_feasible(
     """
     Determine whether a set of resource requests can be satisfied given limited capacities.
 
-    Args:
-        resources : Dict[str, Number], Mapping from resource name to total available capacity.
-        requests : List[Dict[str, Number]], List of requests. Each request is a mapping from resource name to the amount required.
-
-    Returns:
-        True if the allocation is feasible, False otherwise.
-
+    New requirement (in addition to previous behavior):
+      - At least one resource must remain unallocated (i.e., have leftover capacity > 0)
+        after fulfilling all requests. If all resources are consumed exactly, allocation
+        is NOT feasible.
     """
-    # TODO: Implement this function
+    EPS = 1e-9  # tolerance for float comparisons
+
     if not isinstance(resources, dict):
         raise ValueError("resources must be a dict")
     if not isinstance(requests, list):
-        raise ValueError("requests must be a list of dicts")
+        raise ValueError("requests must be a list")
+    if len(resources) == 0:
+        return False
 
-    # Validate capacities + prepare totals
-    totals: Dict[str, float] = {}
+    # ---- Validate resources ----
     for name, cap in resources.items():
         if not isinstance(name, str):
             raise ValueError("resource names must be strings")
-        if not isinstance(cap, (int, float)) or isinstance(cap, bool):
+        if not isinstance(cap, (int, float)):
             raise ValueError("resource capacities must be numeric")
-        cap_f = float(cap)
-        if math.isnan(cap_f) or cap_f < 0:
-            raise ValueError("resource capacities must be non-negative and not NaN")
-        totals[name] = 0.0
+        if not math.isfinite(float(cap)):
+            raise ValueError("resource capacities must be finite")
+        if float(cap) < 0:
+            return False
 
-    # Accumulate demands
+    used: Dict[str, float] = {k: 0.0 for k in resources}
+
     for req in requests:
         if not isinstance(req, dict):
             raise ValueError("each request must be a dict")
 
-        for rname, amt in req.items():
-            # Unknown resource => infeasible
+        for rname, amount in req.items():
+            if not isinstance(rname, str):
+                raise ValueError("request resource names must be strings")
             if rname not in resources:
-                return False
+                return False  # unknown resource -> infeasible
+            if not isinstance(amount, (int, float)):
+                raise ValueError("request amounts must be numeric")
+            if not math.isfinite(float(amount)):
+                raise ValueError("request amounts must be finite")
+            if float(amount) < 0:
+                raise ValueError("request amounts must be non-negative")
 
-            if not isinstance(amt, (int, float)) or isinstance(amt, bool):
-                raise ValueError("requested amounts must be numeric")
-            amt_f = float(amt)
-            if math.isnan(amt_f) or amt_f < 0:
-                raise ValueError("requested amounts must be non-negative and not NaN")
+            used[rname] += float(amount)
 
-            totals[rname] += amt_f
-
-    # Check feasibility
-    for rname, total in totals.items():
-        if total > float(resources[rname]):
+    for rname, cap in resources.items():
+        if used[rname] > float(cap) + EPS:
             return False
 
-    return True
+    return any((float(resources[r]) - used[r]) > EPS for r in resources)
+
+
