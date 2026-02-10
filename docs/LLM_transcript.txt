@@ -1,5 +1,5 @@
-## Student Name:
-## Student ID: 
+## Student Name: Shrey Grover
+## Student ID: 219579143
 
 Prompt 1: "here is my code i need help to check my indentation and logic: ## Student Name: Shrey Grover ## Student ID: 219579143 """ Stub file for the is allocation feasible exercise. Implement the function is_allocation_feasible to Determine whether a set of resource requests can be satisfied given limited capacities. Take int account any possible constraints. See the lab handout for full requirements. """ from typing import Dict, List, Union import math Number = Union[int, float] def is_allocation_feasible( resources: Dict[str, Number], requests: List[Dict[str, Number]] ) -> bool: """ Determine whether a set of resource requests can be satisfied given limited capacities. Args: resources : Dict[str, Number], Mapping from resource name to total available capacity. requests : List[Dict[str, Number]], List of requests. Each request is a mapping from resource name to the amount required. Returns: True if the allocation is feasible, False otherwise. """ # TODO: Implement this function if not isinstance(resources, dict): raise ValueError("resources must be a dict") if not isinstance(requests, list): raise ValueError("requests must be a list of dicts") # Validate capacities + prepare totals totals: Dict[str, float] = {} for name, cap in resources.items(): if not isinstance(name, str): raise ValueError("resource names must be strings") if not isinstance(cap, (int, float)) or isinstance(cap, bool): raise ValueError("resource capacities must be numeric") cap_f = float(cap) if math.isnan(cap_f) or cap_f < 0: raise ValueError("resource capacities must be non-negative and not NaN") totals[name] = 0.0 # Accumulate demands for req in requests: if not isinstance(req, dict): raise ValueError("each request must be a dict") for rname, amt in req.items(): # Unknown resource => infeasible if rname not in resources: return False if not isinstance(amt, (int, float)) or isinstance(amt, bool): raise ValueError("requested amounts must be numeric") amt_f = float(amt) if math.isnan(amt_f) or amt_f < 0: raise ValueError("requested amounts must be non-negative and not NaN") totals[rname] += amt_f # Check feasibility for rname, total in totals.items(): if total > float(resources[rname]): return False return True"
 
@@ -132,3 +132,40 @@ Here are the common variants, and how your assumptions would change:
 If you paste the lab’s constraint bullets (1 screenshot or text), I’ll rewrite your “Assumptions” section to match it exactly and tell you the minimal code tweaks if needed.
 "
 --------------------------------------------------
+Prompt 3:
+this is my last weeks lab i have to update this now for this week: update the is_allocation_feasible function in solution.py with new requirement: at least one resorce must remain unallocated after assignment. This requirement applies in additionn to all previously described behaiour. An allocation that satisfies all other condition but consumes all available resources is no longer valid. Update your solution, tests and documents to incoporate this requirement
+
+Answer: What changed (quick)
+
+solution.py: after checking capacity feasibility, it now verifies there exists at least one resource with leftover > 0 (with tiny float tolerance).
+
+test_solution.py:
+
+Updated old “exact capacity is feasible” test → now expects False
+
+Added tests for:
+
+consuming all resources → False
+
+consuming one resource but leaving another with leftover → True
+
+README.md: added a “New requirement (this week)” section.
+
+If any of your uploaded files “disappear” from the chat later (sometimes the system expires them), just re-upload them and I’ll re-apply the same edits.
+
+prompt 4:
+give me a few more constraints and assumptions
+
+Answer: Additional Constraints
+
+Each resource has a fixed capacity that cannot be exceeded during allocation.
+
+All request amounts must be non-negative and finite numeric values.
+
+A request may only reference resources that exist in the availability set.
+
+The total allocated amount for any resource is computed as the sum of all request amounts for that resource.
+
+Allocations that fully consume all available resources are considered invalid.
+
+Input data must follow the specified structure; malformed inputs result in an error rather than partial evaluation.
